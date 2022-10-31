@@ -1,7 +1,7 @@
 const yourKey = '50be6cdbb2eb453fb12135220223110';
-const url = 'http://api.weatherapi.com/v1/forecast.json?key=' + yourKey + '&q=auto:ip&days=6';
+const url = 'http://api.weatherapi.com/v1/forecast.json?key=' + yourKey + '&q=auto:ip' + '&days=6';
 
-// get local weather after enter the site
+// get weather info about city
 async function getLocalWeather() {
     try {
         let weather = await fetch(url);
@@ -36,6 +36,13 @@ async function getLocalWeather() {
             }
         }
 
+        let dayNames = document.querySelectorAll('.weather__forecast .day');
+        for (let item of dayNames) {
+            for (let i = 1; i < 6; i++) {
+                item.innerText = weather.forecast.forecastday[i].date;
+            }
+        }
+
         let images5Days = document.querySelectorAll('.weather__forecast img');
         for (let item of images5Days) {
             for (let i = 1; i < 6; i++) {
@@ -52,10 +59,13 @@ getLocalWeather();
 
 
 
-// show searching bar
-let addCityBtn = document.getElementById('add-city');
-let searchingBar = document.querySelector('.module__form');
-addCityBtn.addEventListener('click', () => {
+// show and hide searching bar
+const showSearchBar = document.getElementById('add-city');
+const hideSearchBar = document.querySelector('.btn--close');
+const searchingBar = document.querySelector('.module__form');
+showSearchBar.addEventListener('click', () => {
     searchingBar.removeAttribute('hidden');
 });
-
+hideSearchBar.addEventListener('click', () => {
+    searchingBar.hidden = true;
+})
