@@ -61,11 +61,19 @@ getLocalWeather();
 
 // show and hide searching bar
 const showSearchBar = document.getElementById('add-city');
-const hideSearchBar = document.querySelector('.btn--close');
+const hideSearchBar = document.querySelector('.module__form .btn--close');
 const searchingBar = document.querySelector('.module__form');
 showSearchBar.addEventListener('click', () => {
     searchingBar.removeAttribute('hidden');
 });
 hideSearchBar.addEventListener('click', () => {
     searchingBar.hidden = true;
+})
+
+
+// hide weather info
+const hideWeatherInfo = document.querySelector('.module__weather .btn--close');
+const weatherInfo = document.querySelector('.module__weather');
+hideWeatherInfo.addEventListener('click', () => {
+    weatherInfo.hidden = true;
 })
