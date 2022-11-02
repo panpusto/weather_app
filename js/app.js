@@ -1,65 +1,7 @@
-const yourKey = '50be6cdbb2eb453fb12135220223110';
-const url = 'http://api.weatherapi.com/v1/forecast.json?key=' + yourKey + '&q=auto:ip' + '&days=6';
+const yourAPIKey = '50be6cdbb2eb453fb12135220223110';
+const body = document.querySelector('body');
 
-// get weather info about city
-async function getLocalWeather() {
-    try {
-        let weather = await fetch(url);
-        weather = await weather.json();
-        console.log(weather);
-
-        let weatherWindow = document.querySelector('.module__weather');
-        weatherWindow.removeAttribute('hidden');
-
-        let cityName = document.querySelector('.city__name');
-        cityName.innerText = weather.location.name;
-
-        let temperature = document.querySelector('.temperature__value');
-        temperature.innerText = weather.current.feelslike_c;
-
-        let currentIcon = document.querySelector('.weather__icon img');
-        currentIcon.src = weather.current.condition.icon;
-
-        let pressure = document.querySelector('.pressure__value');
-        pressure.innerText = `${weather.current.pressure_mb} hpa`;
-
-        let humidity = document.querySelector('.humidity__value');
-        humidity.innerText = `${weather.current.humidity}%`;
-
-        let windKPH = document.querySelector('.wind-speed__value');
-        windKPH.innerText = `${weather.current.wind_kph} km/h`;
-
-        let temperatures5Days = document.querySelectorAll('.weather__forecast .temperature');
-        for (let item of temperatures5Days) {
-            for (let i = 1; i < 6; i++) {
-                item.innerText = `${weather.forecast.forecastday[i].day.avgtemp_c}°C`;
-            }
-        }
-
-        let dayNames = document.querySelectorAll('.weather__forecast .day');
-        for (let item of dayNames) {
-            for (let i = 1; i < 6; i++) {
-                item.innerText = weather.forecast.forecastday[i].date;
-            }
-        }
-
-        let images5Days = document.querySelectorAll('.weather__forecast img');
-        for (let item of images5Days) {
-            for (let i = 1; i < 6; i++) {
-                item.src = weather.forecast.forecastday[i].day.condition.icon;
-            }
-        }
-
-    } catch (err) {
-        console.log(err);
-    }
-}
-
-getLocalWeather();
-
-
-
-// show and hide searching bar
+// show and hide search bar
 const showSearchBar = document.getElementById('add-city');
 const hideSearchBar = document.querySelector('.module__form .btn--close');
 const searchingBar = document.querySelector('.module__form');
@@ -68,12 +10,85 @@ showSearchBar.addEventListener('click', () => {
 });
 hideSearchBar.addEventListener('click', () => {
     searchingBar.hidden = true;
-})
+});
+
+// get weather info about city
+async function getWeather(city = 'auto:ip') {
+    try {
+        body.classList.remove('loading');
+        let weather = await fetch('http://api.weatherapi.com/v1/forecast.json?key=' + yourAPIKey + '&q=' + city + '&days=6');
+        weather = await weather.json();
+        // console.log(weather);
+
+        let weatherWindow = document.querySelector('.module__weather');
+        let section = document.querySelector('section');
+        let cloneWindow = weatherWindow.cloneNode(true);
+        section.appendChild(cloneWindow);
+        let lastChild = section.lastElementChild;
+        lastChild.removeAttribute('hidden');
+
+        lastChild.querySelector('.city__name').innerText = weather.location.name;
+        lastChild.querySelector('.temperature__value').innerText = weather.current.feelslike_c;
+        lastChild.querySelector('.weather__icon img').src = weather.current.condition.icon;
+        lastChild.querySelector('.pressure__value').innerText = `${weather.current.pressure_mb} hPa`;
+        lastChild.querySelector('.humidity__value').innerText = `${weather.current.humidity}%`;
+        lastChild.querySelector('.wind-speed__value').innerText = `${weather.current.wind_kph} km/h`;
 
 
-// hide weather info
-const hideWeatherInfo = document.querySelector('.module__weather .btn--close');
-const weatherInfo = document.querySelector('.module__weather');
-hideWeatherInfo.addEventListener('click', () => {
-    weatherInfo.hidden = true;
-})
+        // forecast max_temp for 5 next days
+        lastChild.querySelectorAll('.weather__forecast .temperature')[0].innerText =
+            (`${weather.forecast.forecastday[1].day.maxtemp_c}°C`);
+        lastChild.querySelectorAll('.weather__forecast .temperature')[1].innerText =
+            (`${weather.forecast.forecastday[2].day.maxtemp_c}°C`);
+        lastChild.querySelectorAll('.weather__forecast .temperature')[2].innerText =
+            (`${weather.forecast.forecastday[3].day.maxtemp_c}°C`);
+        lastChild.querySelectorAll('.weather__forecast .temperature')[3].innerText =
+            (`${weather.forecast.forecastday[4].day.maxtemp_c}°C`);
+        lastChild.querySelectorAll('.weather__forecast .temperature')[4].innerText =
+            (`${weather.forecast.forecastday[5].day.maxtemp_c}°C`);
+
+
+        // dates for next 5 days forecast
+        lastChild.querySelectorAll('.weather__forecast .day')[0].innerText =
+            (weather.forecast.forecastday[1].date);
+        lastChild.querySelectorAll('.weather__forecast .day')[1].innerText =
+            (weather.forecast.forecastday[2].date);
+        lastChild.querySelectorAll('.weather__forecast .day')[2].innerText =
+            (weather.forecast.forecastday[3].date);
+        lastChild.querySelectorAll('.weather__forecast .day')[3].innerText =
+            (weather.forecast.forecastday[4].date);
+        lastChild.querySelectorAll('.weather__forecast .day')[4].innerText =
+            (weather.forecast.forecastday[5].date);
+
+
+        // images for next 5 days forecast
+        lastChild.querySelectorAll('.weather__forecast img').forEach(elem => {
+            elem.src = weather.forecast.forecastday[1].day.condition.icon;
+        });
+        lastChild.querySelector('button').addEventListener('click', () => {
+            lastChild.hidden = true;
+        });
+
+
+    } catch (err) {
+        console.log(err);
+    }
+}
+
+setTimeout(getWeather, 1000);
+
+// get city name
+const searchBtn = document.querySelector('.find-city button');
+    searchBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const city = document.getElementById('search');
+        getWeather(city.value);
+        searchingBar.hidden = true;
+        searchingBar.querySelector('input').value = '';
+    })
+
+const hideWeatherInfo = document.querySelector('.module__weather button');
+const weatherModule = document.querySelector('.module__weather');
+    hideWeatherInfo.addEventListener('click', () => {
+        weatherModule.hidden = true;
+    })
